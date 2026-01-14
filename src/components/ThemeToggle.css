@@ -1,0 +1,75 @@
+.theme-toggle {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-track {
+    width: 52px;
+    height: 28px;
+    background: var(--bg-input);
+    border-radius: var(--radius-full);
+    position: relative;
+    transition: all var(--transition-normal);
+    border: 2px solid var(--border-color);
+}
+
+.toggle-track.dark {
+    background: #2A2A3E;
+    border-color: #3D3D5C;
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-saffron);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-track.dark .toggle-thumb {
+    left: calc(100% - 22px);
+    background: #6366F1;
+}
+
+.toggle-icon {
+    color: white;
+}
+
+.toggle-icon.sun {
+    animation: spin 0.5s ease;
+}
+
+.toggle-icon.moon {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(-180deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+/* Hover effect */
+.theme-toggle:hover .toggle-track {
+    border-color: var(--accent-saffron);
+}
+
+.theme-toggle:hover .toggle-track.dark {
+    border-color: #6366F1;
+}

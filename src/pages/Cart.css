@@ -1,0 +1,131 @@
+.cart-page {
+    min-height: 100vh;
+}
+
+/* Empty Cart */
+.empty-cart {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.empty-icon {
+    width: 120px;
+    height: 120px;
+    background: var(--bg-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: var(--text-muted);
+}
+
+.empty-cart h2 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.empty-cart p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+/* Cart Header */
+.cart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 24px;
+}
+
+.cart-header h1 {
+    font-size: 1.5rem;
+}
+
+.item-count {
+    background: var(--bg-input);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Cart Layout */
+.cart-layout {
+    display: grid;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .cart-layout {
+        grid-template-columns: 1fr 360px;
+        gap: 30px;
+    }
+}
+
+/* Cart Items */
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Order Summary */
+.order-summary {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    height: fit-content;
+    position: sticky;
+    top: calc(var(--nav-height) + 20px);
+}
+
+.order-summary h3 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.summary-row .free {
+    color: var(--accent-green);
+    font-weight: 600;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--border-color);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.total-price {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--accent-green);
+}
+
+.checkout-btn {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+}
+
+.continue-btn {
+    width: 100%;
+    margin-top: 12px;
+}
