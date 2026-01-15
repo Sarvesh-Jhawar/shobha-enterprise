@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Package, Plus, Edit2, Save, X, LogOut, RefreshCw,
     AlertCircle, CheckCircle, Search, Trash2, Filter
 } from 'lucide-react';
-import { getProducts, createProduct, updateProduct, deleteProduct, logout } from '../services/api';
+import { getProducts, createProduct, updateProduct, deleteProduct, logout, getVariants, createVariant, updateVariant, deleteVariant } from '../services/api';
+import { Layers, Pencil, Trash } from 'lucide-react';
 import { formatName } from '../utils/formatters';
 import './AdminDashboard.css';
 
@@ -20,6 +21,16 @@ export default function AdminDashboard() {
     const [adminData, setAdminData] = useState(null);
     const [showNewCategory, setShowNewCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
+    const [variants, setVariants] = useState([]);
+    const [showVariantsId, setShowVariantsId] = useState(null); // ID of product whose variants are being managed
+    const [variantFormData, setVariantFormData] = useState({
+        quantityValue: '',
+        quantityUnit: 'Kg',
+        price: '',
+        active: true
+    });
+    const [editingVariantId, setEditingVariantId] = useState(null);
+    const [variantLoading, setVariantLoading] = useState(false);
     const navigate = useNavigate();
 
     // Form state for new/edit product
@@ -217,6 +228,108 @@ export default function AdminDashboard() {
                 setError('Failed to delete product. Please try again.');
             }
             console.error(err);
+        }
+    };
+
+    // Variant Handlers
+    const handleManageVariants = async (productId) => {
+        if (showVariantsId === productId) {
+            setShowVariantsId(null);
+            setVariants([]);
+            return;
+        }
+
+        setShowVariantsId(productId);
+        await loadVariants(productId);
+    };
+
+    const loadVariants = async (productId) => {
+        if (!adminData?.tenantSlug) return;
+        try {
+            setVariantLoading(true);
+            const data = await getVariants(adminData.tenantSlug, productId);
+            setVariants(data);
+        } catch (err) {
+            console.error('Failed to load variants:', err);
+            setError('Failed to load variants.');
+        } finally {
+            setVariantLoading(false);
+        }
+    };
+
+    const handleVariantChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setVariantFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const handleSaveVariant = async (e) => {
+        e.preventDefault();
+        if (!adminData?.tenantSlug || !showVariantsId) return;
+
+        try {
+            setVariantLoading(true);
+            const variantData = {
+                ...variantFormData,
+                quantityValue: parseFloat(variantFormData.quantityValue),
+                price: parseFloat(variantFormData.price)
+            };
+
+            if (editingVariantId) {
+                await updateVariant(adminData.tenantSlug, editingVariantId, variantData);
+                setSuccessMsg('Variant updated!');
+            } else {
+                await createVariant(adminData.tenantSlug, showVariantsId, variantData);
+                setSuccessMsg('Variant added!');
+            }
+
+            await loadVariants(showVariantsId);
+            resetVariantForm();
+            setTimeout(() => setSuccessMsg(''), 3000);
+        } catch (err) {
+            console.error('Failed to save variant:', err);
+            setError('Failed to save variant.');
+        } finally {
+            setVariantLoading(false);
+        }
+    };
+
+    const resetVariantForm = () => {
+        setVariantFormData({
+            quantityValue: '',
+            quantityUnit: 'Kg',
+            price: '',
+            active: true
+        });
+        setEditingVariantId(null);
+    };
+
+    const handleEditVariant = (variant) => {
+        setVariantFormData({
+            quantityValue: variant.quantityValue,
+            quantityUnit: variant.quantityUnit,
+            price: variant.price,
+            active: variant.active
+        });
+        setEditingVariantId(variant.id);
+    };
+
+    const handleDeleteVariant = async (variantId) => {
+        if (!adminData?.tenantSlug || !window.confirm('Delete this variant?')) return;
+
+        try {
+            setVariantLoading(true);
+            await deleteVariant(adminData.tenantSlug, variantId);
+            setSuccessMsg('Variant deleted!');
+            await loadVariants(showVariantsId);
+            setTimeout(() => setSuccessMsg(''), 3000);
+        } catch (err) {
+            console.error('Failed to delete variant:', err);
+            setError('Failed to delete variant.');
+        } finally {
+            setVariantLoading(false);
         }
     };
 
@@ -452,43 +565,162 @@ export default function AdminDashboard() {
                             </tr>
                         ) : (
                             filteredProducts.map(product => (
-                                <tr key={product.id}>
-                                    <td>{product.id}</td>
-                                    <td>
-                                        <div className="product-name">{formatName(product.name)}</div>
-                                        <div className="product-desc">{product.description?.slice(0, 50)}...</div>
-                                    </td>
-                                    <td>
-                                        <span className="category-badge">{formatName(product.category)}</span>
-                                    </td>
-                                    <td>
-                                        <span className="current-price">₹{product.price}</span>
-                                    </td>
-                                    <td>{product.unit}</td>
-                                    <td>
-                                        <span className={`status-badge ${product.active ? 'active' : 'inactive'}`}>
-                                            {product.active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="action-buttons">
-                                            <button
-                                                className="btn-edit"
-                                                onClick={() => handleEdit(product)}
-                                                title="Edit"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                className="btn-delete"
-                                                onClick={() => handleDelete(product.id)}
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <Fragment key={product.id}>
+                                    <tr>
+                                        <td>{product.id}</td>
+                                        <td>
+                                            <div className="product-name">{formatName(product.name)}</div>
+                                            <div className="product-desc">{product.description?.slice(0, 50)}...</div>
+                                        </td>
+                                        <td>
+                                            <span className="category-badge">{formatName(product.category)}</span>
+                                        </td>
+                                        <td>
+                                            <span className="current-price">₹{product.price}</span>
+                                        </td>
+                                        <td>{product.unit}</td>
+                                        <td>
+                                            <span className={`status-badge ${product.active ? 'active' : 'inactive'}`}>
+                                                {product.active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="btn-variants"
+                                                    onClick={() => handleManageVariants(product.id)}
+                                                    title="Manage Variants"
+                                                >
+                                                    <Layers size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-edit"
+                                                    onClick={() => handleEdit(product)}
+                                                    title="Edit"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-delete"
+                                                    onClick={() => handleDelete(product.id)}
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {showVariantsId === product.id && (
+                                        <tr className="variants-row">
+                                            <td colSpan="7">
+                                                <div className="variants-container">
+                                                    <div className="variants-header">
+                                                        <h4>Variants for {formatName(product.name)}</h4>
+                                                        <button
+                                                            className="btn-close-variants"
+                                                            onClick={() => setShowVariantsId(null)}
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+
+                                                    <form className="variant-form" onSubmit={handleSaveVariant}>
+                                                        <div className="variant-inputs">
+                                                            <div className="v-field">
+                                                                <label>Qty Value</label>
+                                                                <input
+                                                                    type="number"
+                                                                    name="quantityValue"
+                                                                    value={variantFormData.quantityValue}
+                                                                    onChange={handleVariantChange}
+                                                                    placeholder="e.g. 5"
+                                                                    step="0.01"
+                                                                    required
+                                                                />
+                                                            </div>
+                                                            <div className="v-field">
+                                                                <label>Unit</label>
+                                                                <select
+                                                                    name="quantityUnit"
+                                                                    value={variantFormData.quantityUnit}
+                                                                    onChange={handleVariantChange}
+                                                                >
+                                                                    <option value="Kg">Kg</option>
+                                                                    <option value="Gm">Gm</option>
+                                                                    <option value="L">L</option>
+                                                                    <option value="Ml">Ml</option>
+                                                                    <option value="Piece">Piece</option>
+                                                                    <option value="Pack">Pack</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="v-field">
+                                                                <label>Price (₹)</label>
+                                                                <input
+                                                                    type="number"
+                                                                    name="price"
+                                                                    value={variantFormData.price}
+                                                                    onChange={handleVariantChange}
+                                                                    placeholder="0.00"
+                                                                    step="0.01"
+                                                                    required
+                                                                />
+                                                            </div>
+                                                            <div className="v-actions">
+                                                                <button type="submit" className="btn-v-save" disabled={variantLoading}>
+                                                                    {editingVariantId ? <Save size={16} /> : <Plus size={16} />}
+                                                                    {editingVariantId ? 'Update' : 'Add'}
+                                                                </button>
+                                                                {editingVariantId && (
+                                                                    <button type="button" className="btn-v-cancel" onClick={resetVariantForm}>
+                                                                        <X size={16} />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </form>
+
+                                                    <div className="variants-list">
+                                                        {variantLoading && variants.length === 0 ? (
+                                                            <div className="v-loading">Loading variants...</div>
+                                                        ) : variants.length === 0 ? (
+                                                            <div className="v-empty">No variants added yet.</div>
+                                                        ) : (
+                                                            <table className="v-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Quantity</th>
+                                                                        <th>Price</th>
+                                                                        <th>Status</th>
+                                                                        <th>Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {variants.map(v => (
+                                                                        <tr key={v.id}>
+                                                                            <td>{v.quantityValue} {v.quantityUnit}</td>
+                                                                            <td>₹{v.price}</td>
+                                                                            <td>
+                                                                                <span className={`v-status ${v.active ? 'active' : 'inactive'}`}>
+                                                                                    {v.active ? 'Active' : 'Inactive'}
+                                                                                </span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div className="v-row-actions">
+                                                                                    <button type="button" className="v-btn-e" onClick={() => handleEditVariant(v)}><Pencil size={14} /></button>
+                                                                                    <button type="button" className="v-btn-d" onClick={() => handleDeleteVariant(v.id)}><Trash size={14} /></button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </Fragment>
                             ))
                         )}
                     </tbody>

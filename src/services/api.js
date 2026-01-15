@@ -1,5 +1,5 @@
 // API Service - Connects to Spring Boot backend for authentication and product CRUD
-const API_BASE = 'http://localhost:8082/api';
+const API_BASE = 'http://localhost:8081/api';
 
 // Helper for all requests with credentials (cookies)
 const fetchWithAuth = async (url, options = {}) => {
@@ -66,6 +66,31 @@ export const updateProduct = async (tenantSlug, productId, product) => {
 
 export const deleteProduct = async (tenantSlug, productId) => {
     return fetchWithAuth(`${API_BASE}/${tenantSlug}/products/${productId}`, {
+        method: 'DELETE',
+    });
+};
+
+// ============ VARIANTS ============
+export const getVariants = async (tenantSlug, productId) => {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/products/${productId}/variants`);
+};
+
+export const createVariant = async (tenantSlug, productId, variant) => {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/products/${productId}/variants`, {
+        method: 'POST',
+        body: JSON.stringify(variant),
+    });
+};
+
+export const updateVariant = async (tenantSlug, variantId, variant) => {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/variants/${variantId}`, {
+        method: 'PUT',
+        body: JSON.stringify(variant),
+    });
+};
+
+export const deleteVariant = async (tenantSlug, variantId) => {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/variants/${variantId}`, {
         method: 'DELETE',
     });
 };
