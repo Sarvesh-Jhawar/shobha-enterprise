@@ -73,7 +73,7 @@ export default function Home() {
                             <ShoppingCart size={18} />
                             Shop Now
                         </Link>
-                        <Link to="/category/oils" className="btn btn-outline">
+                        <Link to="/products" className="btn btn-outline">
                             Explore Products
                             <ArrowRight size={18} />
                         </Link>

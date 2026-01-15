@@ -26,7 +26,7 @@ const categoryImages = {
 export const fetchProducts = async () => {
     const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, product_variants(*)')
         .eq('active', true)
         .order('id');
 
@@ -55,10 +55,10 @@ export const fetchCategories = async () => {
 
     return uniqueCategories.map(cat => ({
         id: cat,
-        name: cat.charAt(0).toUpperCase() + cat.slice(1), // Capitalize first letter
+        name: cat.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
         icon: categoryIcons[cat] || 'Package',
         image: categoryImages[cat] || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=300&fit=crop',
-        description: `Quality ${cat} products`
+        description: `Quality ${cat.replace(/_/g, ' ')} products`
     }));
 };
 
@@ -72,7 +72,7 @@ export const fetchCategoryById = async (categoryId) => {
 export const fetchProductsByCategory = async (category) => {
     const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, product_variants(*)')
         .eq('active', true)
         .eq('category', category)
         .order('id');
@@ -89,7 +89,7 @@ export const fetchProductsByCategory = async (category) => {
 export const fetchProductById = async (id) => {
     const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, product_variants(*)')
         .eq('id', id)
         .single();
 
@@ -105,7 +105,7 @@ export const fetchProductById = async (id) => {
 export const fetchFeaturedProducts = async () => {
     const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, product_variants(*)')
         .eq('active', true)
         .order('id')
         .limit(6);
@@ -122,7 +122,7 @@ export const fetchFeaturedProducts = async () => {
 export const searchProducts = async (query) => {
     const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, product_variants(*)')
         .eq('active', true)
         .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)
         .order('id');

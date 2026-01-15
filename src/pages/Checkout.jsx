@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Check, MessageCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { formatName } from '../utils/formatters';
 import './Checkout.css';
 
 export default function Checkout() {
@@ -89,7 +90,7 @@ export default function Checkout() {
                 : item.price;
             const itemTotal = itemPrice * item.quantity;
 
-            message += `${index + 1}. *${item.name}*\n`;
+            message += `${index + 1}. *${formatName(item.name)}*\n`;
             if (item.variant) {
                 message += `   Size: ${item.variant}\n`;
             }
@@ -190,9 +191,9 @@ export default function Checkout() {
                         <div className="summary-items">
                             {cartItems.map(item => (
                                 <div key={item.cartId} className="summary-item">
-                                    <img src={item.image} alt={item.name} />
+                                    <img src={item.image} alt={formatName(item.name)} />
                                     <div className="item-details">
-                                        <span className="item-name">{item.name}</span>
+                                        <span className="item-name">{formatName(item.name)}</span>
                                         {item.variant && <span className="item-variant">{item.variant}</span>}
                                         <span className="item-qty">Qty: {item.quantity}</span>
                                     </div>

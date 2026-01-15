@@ -63,7 +63,6 @@ export default function Footer() {
 
                 <div className="footer-bottom">
                     <p>© {new Date().getFullYear()} Shobha Enterprises. All rights reserved.</p>
-                    <Link to="/admin" className="admin-link">Admin</Link>
                     <div className="social-links">
                         <a href="https://wa.me/919848100000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">

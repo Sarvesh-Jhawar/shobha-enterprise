@@ -5,6 +5,7 @@ import {
     AlertCircle, CheckCircle, Search, Trash2, Filter
 } from 'lucide-react';
 import { getProducts, createProduct, updateProduct, deleteProduct, logout } from '../services/api';
+import { formatName } from '../utils/formatters';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
@@ -140,7 +141,7 @@ export default function AdminDashboard() {
     const handleEdit = (product) => {
         const categoryExists = categories.includes(product.category);
         setFormData({
-            name: product.name || '',
+            name: formatName(product.name) || '',
             description: product.description || '',
             price: product.price || '',
             category: product.category || '',
@@ -296,7 +297,7 @@ export default function AdminDashboard() {
                     >
                         <option value="all">All Categories</option>
                         {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat} value={cat}>{formatName(cat)}</option>
                         ))}
                     </select>
                 </div>
@@ -454,11 +455,11 @@ export default function AdminDashboard() {
                                 <tr key={product.id}>
                                     <td>{product.id}</td>
                                     <td>
-                                        <div className="product-name">{product.name}</div>
+                                        <div className="product-name">{formatName(product.name)}</div>
                                         <div className="product-desc">{product.description?.slice(0, 50)}...</div>
                                     </td>
                                     <td>
-                                        <span className="category-badge">{product.category}</span>
+                                        <span className="category-badge">{formatName(product.category)}</span>
                                     </td>
                                     <td>
                                         <span className="current-price">₹{product.price}</span>

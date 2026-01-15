@@ -5,6 +5,7 @@ import { fetchProductById, fetchProductsByCategory } from '../services/productSe
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import Footer from '../components/Footer';
+import { formatName } from '../utils/formatters';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -26,7 +27,17 @@ export default function ProductDetail() {
                 setLoading(true);
                 const prod = await fetchProductById(id);
                 setProduct(prod);
-                setSelectedVariant(prod?.unit || null);
+
+                // Set initial variant if variants exist
+                if (prod?.product_variants && prod.product_variants.length > 0) {
+                    setSelectedVariant(prod.product_variants[0]);
+                } else if (prod?.unit) {
+                    setSelectedVariant({
+                        quantity_value: '',
+                        quantity_unit: prod.unit,
+                        price: prod.price
+                    });
+                }
 
                 // Fetch related products
                 if (prod?.category) {
@@ -99,7 +110,7 @@ export default function ProductDetail() {
                     <div className="product-image-section">
                         <img
                             src={product.image_name || 'https://via.placeholder.com/400'}
-                            alt={product.name}
+                            alt={formatName(product.name)}
                             className="main-image"
                         />
                     </div>
@@ -107,17 +118,39 @@ export default function ProductDetail() {
                     {/* Product Info */}
                     <div className="product-info-section">
                         <span className="product-category">{product.category}</span>
-                        <h1 className="product-title">{product.name}</h1>
+                        <h1 className="product-title">{formatName(product.name)}</h1>
 
                         <div className="product-price">
-                            <span className="price">₹{product.price}</span>
-                            {product.unit && <span className="variant-label">/ {product.unit}</span>}
+                            <span className="price">₹{selectedVariant?.price || product.price}</span>
+                            {selectedVariant && (
+                                <span className="variant-label">
+                                    / {selectedVariant.quantity_value} {selectedVariant.quantity_unit}
+                                </span>
+                            )}
                         </div>
 
                         <p className="product-description">{product.description}</p>
 
-                        {/* Unit Display */}
-                        {product.unit && (
+                        {/* Variants Section */}
+                        {product.product_variants && product.product_variants.length > 0 && (
+                            <div className="variants-section">
+                                <h4>Available Sizes</h4>
+                                <div className="variant-options">
+                                    {product.product_variants.map((v, index) => (
+                                        <button
+                                            key={v.id || index}
+                                            className={`variant-btn ${selectedVariant?.id === v.id ? 'active' : ''}`}
+                                            onClick={() => setSelectedVariant(v)}
+                                        >
+                                            {v.quantity_value} {v.quantity_unit}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Fallback for single unit if no variants */}
+                        {!product.product_variants?.length && product.unit && (
                             <div className="variants-section">
                                 <h4>Unit</h4>
                                 <div className="variant-options">

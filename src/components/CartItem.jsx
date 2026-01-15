@@ -1,5 +1,6 @@
 import { Minus, Plus, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { formatName } from '../utils/formatters';
 import './CartItem.css';
 
 export default function CartItem({ item }) {
@@ -7,20 +8,18 @@ export default function CartItem({ item }) {
     const { cartId, name, image, variant, quantity } = item;
 
     // Get price based on variant if exists
-    const price = variant
-        ? (item.variants?.find(v => v.size === variant)?.price || item.price)
-        : item.price;
+    const price = variant ? variant.price : item.price;
 
     const subtotal = price * quantity;
 
     return (
         <div className="cart-item">
-            <img src={image} alt={name} className="cart-item-image" />
+            <img src={image} alt={formatName(name)} className="cart-item-image" />
 
             <div className="cart-item-details">
                 <div className="cart-item-header">
                     <div>
-                        <h4 className="cart-item-name">{name}</h4>
+                        <h4 className="cart-item-name">{formatName(name)}</h4>
                         {variant && <span className="cart-item-variant">{variant}</span>}
                     </div>
                     <button

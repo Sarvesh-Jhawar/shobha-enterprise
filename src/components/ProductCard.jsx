@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useToast } from './Toast';
+import { formatName } from '../utils/formatters';
 import './ProductCard.css';
 
 export default function ProductCard({ product, featured = false }) {
@@ -32,12 +33,12 @@ export default function ProductCard({ product, featured = false }) {
     return (
         <Link to={`/product/${id}`} className={`product-card ${featured ? 'featured' : ''}`}>
             <div className="product-image-wrapper">
-                <img src={productImage} alt={name} className="product-image" loading="lazy" />
+                <img src={productImage} alt={formatName(name)} className="product-image" loading="lazy" />
             </div>
 
             <div className="product-info">
                 <span className="product-category">{category}</span>
-                <h3 className="product-name">{name}</h3>
+                <h3 className="product-name">{formatName(name)}</h3>
 
                 <div className="product-price-row">
                     <div className="price-wrapper">

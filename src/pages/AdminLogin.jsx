@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, Eye, EyeOff, ShieldCheck, Store } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, ShieldCheck, Store, LogIn } from 'lucide-react';
 import { login } from '../services/api';
 import './AdminLogin.css';
 
 // Default tenant slug - can be configured
-const DEFAULT_TENANT_SLUG = 'shobha-enterprises';
+const DEFAULT_TENANT_SLUG = 'shobha';
 
 export default function AdminLogin() {
     const [tenantSlug, setTenantSlug] = useState(DEFAULT_TENANT_SLUG);
@@ -135,7 +135,7 @@ export default function AdminLogin() {
                                 <span className="spinner"></span>
                             ) : (
                                 <>
-                                    <Lock size={18} />
+                                    <LogIn size={18} />
                                     Sign In
                                 </>
                             )}

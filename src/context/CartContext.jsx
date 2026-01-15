@@ -15,7 +15,8 @@ export function CartProvider({ children }) {
     const addToCart = (product, quantity = 1, variant = null) => {
         setCartItems(prev => {
             const existingIndex = prev.findIndex(
-                item => item.id === product.id && item.variant === variant
+                item => item.id === product.id &&
+                    (variant ? (item.variant?.id === variant.id) : !item.variant)
             );
 
             if (existingIndex >= 0) {
@@ -27,8 +28,8 @@ export function CartProvider({ children }) {
             return [...prev, {
                 ...product,
                 quantity,
-                variant,
-                cartId: `${product.id}-${variant || 'default'}-${Date.now()}`
+                variant, // Store the full variant object
+                cartId: `${product.id}-${variant?.id || 'default'}-${Date.now()}`
             }];
         });
     };
@@ -56,9 +57,7 @@ export function CartProvider({ children }) {
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     const cartTotal = cartItems.reduce((sum, item) => {
-        const price = item.variant ?
-            (item.variants?.find(v => v.size === item.variant)?.price || item.price) :
-            item.price;
+        const price = item.variant ? item.variant.price : item.price;
         return sum + (price * item.quantity);
     }, 0);
 
