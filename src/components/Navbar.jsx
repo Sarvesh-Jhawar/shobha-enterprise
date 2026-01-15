@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import ThemeToggle from './ThemeToggle';
 import './Navbar.css';
@@ -58,6 +58,10 @@ export default function Navbar() {
                         <User size={22} />
                     </Link>
 
+                    <Link to="/admin" className="navbar-admin desktop-only" title="Admin Login">
+                        <ShieldCheck size={22} />
+                    </Link>
+
                     <button
                         className="mobile-menu-btn"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -85,6 +89,9 @@ export default function Navbar() {
                         <Link to="/products" onClick={() => setMobileMenuOpen(false)}>Products</Link>
                         <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
                         <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+                        <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="admin-link">
+                            <ShieldCheck size={16} /> Admin
+                        </Link>
                     </div>
                 </div>
             )}

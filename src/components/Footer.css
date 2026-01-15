@@ -184,3 +184,17 @@
     color: white;
     transform: translateY(-2px);
 }
+
+/* Admin Link */
+.admin-link {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.admin-link:hover {
+    opacity: 1;
+    color: var(--accent-saffron);
+}

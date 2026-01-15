@@ -114,7 +114,8 @@
 }
 
 .navbar-cart,
-.navbar-user {
+.navbar-user,
+.navbar-admin {
     position: relative;
     width: 40px;
     height: 40px;
@@ -130,6 +131,11 @@
 .navbar-user:hover {
     background: var(--bg-input);
     color: var(--accent-saffron);
+}
+
+.navbar-admin:hover {
+    background: var(--bg-input);
+    color: var(--accent-green);
 }
 
 .cart-badge {
@@ -242,4 +248,19 @@
 .mobile-links a:hover {
     background: var(--bg-input);
     color: var(--accent-saffron);
+}
+
+.mobile-links .admin-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-green);
+    border-top: 1px solid var(--border-color);
+    margin-top: 8px;
+    padding-top: 16px;
+}
+
+.mobile-links .admin-link:hover {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--accent-green);
 }
