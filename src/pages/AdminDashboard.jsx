@@ -4,7 +4,7 @@ import {
     Package, Plus, Edit2, Save, X, LogOut, RefreshCw,
     AlertCircle, CheckCircle, Search, Trash2, Filter
 } from 'lucide-react';
-import { getProducts, createProduct, updateProduct, deleteProduct, logout, getVariants, createVariant, updateVariant, deleteVariant } from '../services/api';
+import { getProducts, createProduct, updateProduct, deleteProduct, logout, getVariants, createVariant, updateVariant, deleteVariant, validateSession } from '../services/api';
 import { Layers, Pencil, Trash } from 'lucide-react';
 import { formatName } from '../utils/formatters';
 import './AdminDashboard.css';
