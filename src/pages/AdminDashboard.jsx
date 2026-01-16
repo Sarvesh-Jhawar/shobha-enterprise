@@ -372,7 +372,7 @@ export default function AdminDashboard() {
                     </div>
                 </div>
                 <div className="admin-header-right">
-                    <button className="btn-icon" onClick={loadProducts} title="Refresh">
+                    <button className="btn-icon" onClick={() => loadProducts()} title="Refresh">
                         <RefreshCw size={20} />
                     </button>
                     <button className="btn-logout" onClick={handleLogout}>
