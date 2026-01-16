@@ -31,6 +31,7 @@ export default function AdminDashboard() {
     });
     const [editingVariantId, setEditingVariantId] = useState(null);
     const [variantLoading, setVariantLoading] = useState(false);
+    const [expandedRowId, setExpandedRowId] = useState(null); // New state for row-click behavior
     const navigate = useNavigate();
 
     // Form state for new/edit product
@@ -420,10 +421,10 @@ export default function AdminDashboard() {
                 </button>
             </div>
 
-            {/* Add/Edit Form */}
+            {/* Add/Edit Form Modal */}
             {(showAddForm || editingId) && (
-                <div className="product-form-container">
-                    <div className="product-form">
+                <div className="modal-overlay" onClick={resetForm}>
+                    <div className="product-form-modal" onClick={e => e.stopPropagation()}>
                         <div className="form-header">
                             <h3>{editingId ? 'Edit Product' : 'Add New Product'}</h3>
                             <button className="btn-close" onClick={resetForm}>
@@ -547,30 +548,29 @@ export default function AdminDashboard() {
                 <table className="products-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Category</th>
                             <th>Price</th>
-                            <th>Unit</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th className="desktop-only-cell">Unit</th>
+                            <th className="desktop-only-cell">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredProducts.length === 0 ? (
                             <tr>
-                                <td colSpan="7" className="no-data">
+                                <td colSpan="5" className="no-data">
                                     No products found
                                 </td>
                             </tr>
                         ) : (
                             filteredProducts.map(product => (
                                 <Fragment key={product.id}>
-                                    <tr>
-                                        <td>{product.id}</td>
+                                    <tr
+                                        className={`product-row ${expandedRowId === product.id ? 'expanded' : ''}`}
+                                        onClick={() => setExpandedRowId(expandedRowId === product.id ? null : product.id)}
+                                    >
                                         <td>
                                             <div className="product-name">{formatName(product.name)}</div>
-                                            <div className="product-desc">{product.description?.slice(0, 50)}...</div>
                                         </td>
                                         <td>
                                             <span className="category-badge">{formatName(product.category)}</span>
@@ -578,41 +578,60 @@ export default function AdminDashboard() {
                                         <td>
                                             <span className="current-price">₹{product.price}</span>
                                         </td>
-                                        <td>{product.unit}</td>
-                                        <td>
+                                        <td className="desktop-only-cell">{product.unit}</td>
+                                        <td className="desktop-only-cell">
                                             <span className={`status-badge ${product.active ? 'active' : 'inactive'}`}>
                                                 {product.active ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
-                                        <td>
-                                            <div className="action-buttons">
-                                                <button
-                                                    className="btn-variants"
-                                                    onClick={() => handleManageVariants(product.id)}
-                                                    title="Manage Variants"
-                                                >
-                                                    <Layers size={16} />
-                                                </button>
-                                                <button
-                                                    className="btn-edit"
-                                                    onClick={() => handleEdit(product)}
-                                                    title="Edit"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button
-                                                    className="btn-delete"
-                                                    onClick={() => handleDelete(product.id)}
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
                                     </tr>
+                                    {expandedRowId === product.id && (
+                                        <tr className="actions-expanded-row">
+                                            <td colSpan="5">
+                                                <div className="expanded-content animate-fadeIn">
+                                                    <div className="expanded-info">
+                                                        <p className="full-desc"><strong>Description:</strong> {product.description || 'No description available'}</p>
+                                                        <div className="mobile-only-info">
+                                                            <p><strong>Unit:</strong> {product.unit}</p>
+                                                            <p><strong>Status:</strong> {product.active ? 'Active' : 'Inactive'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="row-actions">
+                                                        <button
+                                                            className="btn-action-primary"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleManageVariants(product.id);
+                                                            }}
+                                                        >
+                                                            <Layers size={16} /> Variants
+                                                        </button>
+                                                        <button
+                                                            className="btn-action-edit"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEdit(product);
+                                                            }}
+                                                        >
+                                                            <Edit2 size={16} /> Edit
+                                                        </button>
+                                                        <button
+                                                            className="btn-action-delete"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(product.id);
+                                                            }}
+                                                        >
+                                                            <Trash2 size={16} /> Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
                                     {showVariantsId === product.id && (
                                         <tr className="variants-row">
-                                            <td colSpan="7">
+                                            <td colSpan="5">
                                                 <div className="variants-container">
                                                     <div className="variants-header">
                                                         <h4>Variants for {formatName(product.name)}</h4>

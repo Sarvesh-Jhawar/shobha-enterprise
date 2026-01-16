@@ -21,6 +21,10 @@ export default function AdminLogin() {
         setError('');
         setIsLoading(true);
 
+        // Clear any stale session before new login
+        sessionStorage.removeItem('isAdminLoggedIn');
+        sessionStorage.removeItem('adminData');
+
         try {
             const response = await login(tenantSlug, username, password);
 
