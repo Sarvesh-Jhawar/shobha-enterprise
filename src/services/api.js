@@ -53,6 +53,10 @@ export const logout = async (tenantSlug) => {
     });
 };
 
+export const validateSession = async (tenantSlug) => {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admins/me`);
+};
+
 // ============ PRODUCTS ============
 export const getProducts = async (tenantSlug) => {
     return fetchWithAuth(`${API_BASE}/${tenantSlug}/products`);

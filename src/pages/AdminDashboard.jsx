@@ -52,48 +52,67 @@ export default function AdminDashboard() {
 
     // Check auth on mount
     useEffect(() => {
-        const isLoggedIn = sessionStorage.getItem('isAdminLoggedIn');
-        const storedAdminData = sessionStorage.getItem('adminData');
+        const checkAuth = async () => {
+            const isLoggedIn = sessionStorage.getItem('isAdminLoggedIn');
+            const storedAdminData = sessionStorage.getItem('adminData');
 
-        if (!isLoggedIn || !storedAdminData) {
-            navigate('/admin');
-            return;
-        }
+            if (!isLoggedIn || !storedAdminData) {
+                navigate('/admin');
+                return;
+            }
 
-        try {
-            const parsed = JSON.parse(storedAdminData);
-            setAdminData(parsed);
-        } catch {
-            navigate('/admin');
-            return;
-        }
+            try {
+                const parsed = JSON.parse(storedAdminData);
+                setAdminData(parsed);
+
+                // Verify session with backend
+                if (parsed?.tenantSlug) {
+                    setLoading(true);
+                    await validateSession(parsed.tenantSlug);
+                    // If successful, proceed to load products
+                    await loadProducts(parsed.tenantSlug);
+                }
+            } catch (err) {
+                console.error('Session validation failed:', err);
+                if (err.status === 401) {
+                    setError('Session expired or blocked. Please log in again.');
+                } else {
+                    setError('Unable to verify login session. Please check your connection.');
+                }
+                setTimeout(() => handleLogout(), 3000);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkAuth();
     }, [navigate]);
 
-    // Load products when adminData is available
-    useEffect(() => {
-        if (adminData?.tenantSlug) {
-            loadProducts();
-        }
-    }, [adminData]);
-
-    const loadProducts = async () => {
-        if (!adminData?.tenantSlug) return;
+    const loadProducts = async (slug = adminData?.tenantSlug) => {
+        const tenantSlug = slug;
+        if (!tenantSlug) return;
 
         try {
             setLoading(true);
             setError('');
-            const data = await getProducts(adminData.tenantSlug);
+            const data = await getProducts(tenantSlug);
             setProducts(data);
         } catch (err) {
-            if (err.status === 401) {
-                setError('Session expired. Please login again.');
-                setTimeout(() => handleLogout(), 2000);
-            } else {
-                setError('Failed to load products. Make sure the backend server is running.');
-            }
-            console.error(err);
+            handleApiError(err, 'Failed to load products.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleApiError = (err, defaultMsg) => {
+        console.error(err);
+        if (err.status === 401) {
+            setError('Session expired or unauthorized. If you just logged in, please ensure your browser allows cross-site cookies.');
+            setTimeout(() => handleLogout(), 3000);
+        } else if (err.status === 500) {
+            setError('Server error (500). Please check backend logs.');
+        } else {
+            setError(err.message || defaultMsg);
         }
     };
 
@@ -198,13 +217,7 @@ export default function AdminDashboard() {
             resetForm();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            if (err.status === 401) {
-                setError('Session expired. Please login again.');
-                setTimeout(() => handleLogout(), 2000);
-            } else {
-                setError('Failed to save product. Please try again.');
-            }
-            console.error(err);
+            handleApiError(err, 'Failed to save product. Please try again.');
         }
     };
 
@@ -222,13 +235,7 @@ export default function AdminDashboard() {
             await loadProducts();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            if (err.status === 401) {
-                setError('Session expired. Please login again.');
-                setTimeout(() => handleLogout(), 2000);
-            } else {
-                setError('Failed to delete product. Please try again.');
-            }
-            console.error(err);
+            handleApiError(err, 'Failed to delete product. Please try again.');
         }
     };
 
@@ -251,8 +258,7 @@ export default function AdminDashboard() {
             const data = await getVariants(adminData.tenantSlug, productId);
             setVariants(data);
         } catch (err) {
-            console.error('Failed to load variants:', err);
-            setError('Failed to load variants.');
+            handleApiError(err, 'Failed to load variants.');
         } finally {
             setVariantLoading(false);
         }
@@ -290,8 +296,7 @@ export default function AdminDashboard() {
             resetVariantForm();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            console.error('Failed to save variant:', err);
-            setError('Failed to save variant.');
+            handleApiError(err, 'Failed to save variant.');
         } finally {
             setVariantLoading(false);
         }
@@ -327,8 +332,7 @@ export default function AdminDashboard() {
             await loadVariants(showVariantsId);
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
-            console.error('Failed to delete variant:', err);
-            setError('Failed to delete variant.');
+            handleApiError(err, 'Failed to delete variant.');
         } finally {
             setVariantLoading(false);
         }
