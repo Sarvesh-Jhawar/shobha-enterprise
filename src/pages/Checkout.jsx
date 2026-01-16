@@ -6,11 +6,18 @@ import { formatName } from '../utils/formatters';
 import './Checkout.css';
 
 export default function Checkout() {
-    const { cartItems, cartTotal, taxAmount, grandTotal, clearCart, cartCount } = useCart();
+    const { cartItems, cartTotal, clearCart, cartCount } = useCart();
+
+    // Get current date and time for defaults
+    const now = new Date();
+    const currentDateStr = now.toISOString().split('T')[0];
+    const currentTimeStr = now.toTimeString().slice(0, 5);
 
     const [formData, setFormData] = useState({
         name: '',
-        mobile: ''
+        mobile: '',
+        pickupDate: currentDateStr,
+        pickupTime: currentTimeStr
     });
 
     const [orderPlaced, setOrderPlaced] = useState(false);
@@ -62,12 +69,18 @@ export default function Checkout() {
     };
 
     const generateBillMessage = () => {
-        const currentDate = new Date().toLocaleDateString('en-IN', {
+        const orderDate = new Date().toLocaleDateString('en-IN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
+        });
+
+        const pickupDateFormatted = new Date(formData.pickupDate).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
         });
 
         let message = `🧾 *SHOBHA ENTERPRISES*\n`;
@@ -78,21 +91,20 @@ export default function Checkout() {
         message += `👤 *Customer Details*\n`;
         message += `Name: ${formData.name}\n`;
         message += `Phone: +91 ${formData.mobile}\n`;
-        message += `Date: ${currentDate}\n\n`;
+        message += `Order Date: ${orderDate}\n`;
+        message += `*Pickup: ${pickupDateFormatted} at ${formData.pickupTime}*\n\n`;
 
         message += `━━━━━━━━━━━━━━━━━━━━\n`;
         message += `🛒 *ORDER ITEMS*\n`;
         message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
 
         cartItems.forEach((item, index) => {
-            const itemPrice = item.variant
-                ? (item.variants?.find(v => v.size === item.variant)?.price || item.price)
-                : item.price;
+            const itemPrice = item.variant?.price || item.price;
             const itemTotal = itemPrice * item.quantity;
 
             message += `${index + 1}. *${formatName(item.name)}*\n`;
             if (item.variant) {
-                message += `   Size: ${item.variant}\n`;
+                message += `   Size: ${item.variant.quantity_value}${item.variant.quantity_unit}\n`;
             }
             message += `   Qty: ${item.quantity} × ₹${itemPrice}\n`;
             message += `   Subtotal: ₹${itemTotal}\n\n`;
@@ -101,11 +113,7 @@ export default function Checkout() {
         message += `━━━━━━━━━━━━━━━━━━━━\n`;
         message += `💰 *BILL SUMMARY*\n`;
         message += `━━━━━━━━━━━━━━━━━━━━\n`;
-        message += `Items (${cartCount}): ₹${cartTotal}\n`;
-        message += `Tax (GST 5%): ₹${taxAmount}\n`;
-        message += `Delivery: FREE\n`;
-        message += `━━━━━━━━━━━━━━━━━━━━\n`;
-        message += `*GRAND TOTAL: ₹${grandTotal}*\n`;
+        message += `*TOTAL AMOUNT: ₹${cartTotal}*\n`;
         message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
 
         message += `Thank you for your order! 🙏`;
@@ -133,7 +141,7 @@ export default function Checkout() {
         setOrderPlaced(true);
     };
 
-    const isFormValid = formData.name && formData.mobile && formData.mobile.length === 10;
+    const isFormValid = formData.name && formData.mobile && formData.mobile.length === 10 && formData.pickupDate && formData.pickupTime;
 
     return (
         <div className="page checkout-page">
@@ -182,6 +190,35 @@ export default function Checkout() {
                                 />
                             </div>
                         </div>
+
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label htmlFor="pickupDate">Pickup Date</label>
+                                <input
+                                    type="date"
+                                    id="pickupDate"
+                                    name="pickupDate"
+                                    min={currentDateStr}
+                                    value={formData.pickupDate}
+                                    onChange={handleChange}
+                                    className="input"
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="pickupTime">Pickup Time</label>
+                                <input
+                                    type="time"
+                                    id="pickupTime"
+                                    name="pickupTime"
+                                    value={formData.pickupTime}
+                                    onChange={handleChange}
+                                    className="input"
+                                    required
+                                />
+                            </div>
+                        </div>
                     </form>
 
                     {/* Order Summary */}
@@ -194,13 +231,15 @@ export default function Checkout() {
                                     <img src={item.image} alt={formatName(item.name)} />
                                     <div className="item-details">
                                         <span className="item-name">{formatName(item.name)}</span>
-                                        {item.variant && <span className="item-variant">{item.variant}</span>}
+                                        {item.variant && (
+                                            <span className="item-variant">
+                                                {item.variant.quantity_value}{item.variant.quantity_unit}
+                                            </span>
+                                        )}
                                         <span className="item-qty">Qty: {item.quantity}</span>
                                     </div>
                                     <span className="item-price">
-                                        ₹{(item.variant
-                                            ? (item.variants?.find(v => v.size === item.variant)?.price || item.price)
-                                            : item.price) * item.quantity}
+                                        ₹{(item.variant?.price || item.price) * item.quantity}
                                     </span>
                                 </div>
                             ))}
@@ -211,17 +250,9 @@ export default function Checkout() {
                                 <span>{cartCount} Items</span>
                                 <span>₹{cartTotal}</span>
                             </div>
-                            <div className="summary-row">
-                                <span>Tax (GST 5%)</span>
-                                <span>₹{taxAmount}</span>
-                            </div>
-                            <div className="summary-row">
-                                <span>Delivery</span>
-                                <span className="free">FREE</span>
-                            </div>
                             <div className="summary-total">
                                 <span>Total</span>
-                                <span>₹{grandTotal}</span>
+                                <span>₹{cartTotal}</span>
                             </div>
                         </div>
 
@@ -232,7 +263,7 @@ export default function Checkout() {
                             onClick={handleSubmit}
                         >
                             <MessageCircle size={18} />
-                            Order via WhatsApp ₹{grandTotal}
+                            Order via WhatsApp ₹{cartTotal}
                         </button>
                     </div>
                 </div>

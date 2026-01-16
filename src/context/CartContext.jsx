@@ -61,16 +61,11 @@ export function CartProvider({ children }) {
         return sum + (parseFloat(price) * item.quantity || 0);
     }, 0);
 
-    const taxAmount = Math.round(cartTotal * 0.05); // 5% GST
-    const grandTotal = cartTotal + taxAmount;
-
     return (
         <CartContext.Provider value={{
             cartItems,
             cartCount,
             cartTotal,
-            taxAmount,
-            grandTotal,
             addToCart,
             removeFromCart,
             updateQuantity,
