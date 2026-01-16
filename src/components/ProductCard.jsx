@@ -26,7 +26,7 @@ export default function ProductCard({ product, featured = false }) {
     const handleAddToCart = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        addToCart(product, 1, unit || product.variants?.[0]?.size || null);
+        addToCart({ ...product, price }, 1, unit || product.variants?.[0]?.size || null);
         showToast('Added to cart!');
     };
 

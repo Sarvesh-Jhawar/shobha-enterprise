@@ -1,11 +1,11 @@
 // API Service - Connects to Spring Boot backend for authentication and product CRUD
-const API_BASE = 'http://localhost:8081/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://enterprises-backend-production.up.railway.app/api';
 
 // Helper for all requests with credentials (cookies)
 const fetchWithAuth = async (url, options = {}) => {
     const response = await fetch(url, {
         ...options,
-        credentials: 'include', // IMPORTANT: Send cookies with requests
+        credentials: 'include', // Required for Spring Security session cookies
         headers: {
             'Content-Type': 'application/json',
             ...options.headers,
@@ -16,13 +16,13 @@ const fetchWithAuth = async (url, options = {}) => {
         const error = new Error('API Error');
         error.status = response.status;
         try {
-            error.message = await response.text();
+            const errorData = await response.json();
+            error.message = errorData.message || 'Access Denied';
         } catch {
             error.message = `HTTP error! status: ${response.status}`;
         }
         throw error;
     }
-
     return response.json();
 };
 
@@ -35,9 +35,8 @@ export const login = async (tenantSlug, username, password) => {
 };
 
 export const logout = async (tenantSlug) => {
-    return fetch(`${API_BASE}/${tenantSlug}/admins/logout`, {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admins/logout`, {
         method: 'POST',
-        credentials: 'include',
     });
 };
 
@@ -72,25 +71,25 @@ export const deleteProduct = async (tenantSlug, productId) => {
 
 // ============ VARIANTS ============
 export const getVariants = async (tenantSlug, productId) => {
-    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/products/${productId}/variants`);
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/products/${productId}/variants`);
 };
 
 export const createVariant = async (tenantSlug, productId, variant) => {
-    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/products/${productId}/variants`, {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/products/${productId}/variants`, {
         method: 'POST',
         body: JSON.stringify(variant),
     });
 };
 
 export const updateVariant = async (tenantSlug, variantId, variant) => {
-    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/variants/${variantId}`, {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/variants/${variantId}`, {
         method: 'PUT',
         body: JSON.stringify(variant),
     });
 };
 
 export const deleteVariant = async (tenantSlug, variantId) => {
-    return fetchWithAuth(`${API_BASE}/${tenantSlug}/admin/variants/${variantId}`, {
+    return fetchWithAuth(`${API_BASE}/${tenantSlug}/variants/${variantId}`, {
         method: 'DELETE',
     });
 };

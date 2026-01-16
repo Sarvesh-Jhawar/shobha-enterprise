@@ -57,8 +57,8 @@ export function CartProvider({ children }) {
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     const cartTotal = cartItems.reduce((sum, item) => {
-        const price = item.variant ? item.variant.price : item.price;
-        return sum + (price * item.quantity);
+        const price = item.variant?.price || item.price || 0;
+        return sum + (parseFloat(price) * item.quantity || 0);
     }, 0);
 
     const taxAmount = Math.round(cartTotal * 0.05); // 5% GST

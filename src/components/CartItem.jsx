@@ -8,9 +8,9 @@ export default function CartItem({ item }) {
     const { cartId, name, image, variant, quantity } = item;
 
     // Get price based on variant if exists
-    const price = variant ? variant.price : item.price;
+    const price = variant?.price || item.price || 0;
 
-    const subtotal = price * quantity;
+    const subtotal = parseFloat(price) * quantity;
 
     return (
         <div className="cart-item">
@@ -20,7 +20,7 @@ export default function CartItem({ item }) {
                 <div className="cart-item-header">
                     <div>
                         <h4 className="cart-item-name">{formatName(name)}</h4>
-                        {variant && <span className="cart-item-variant">{variant}</span>}
+                        {variant && <span className="cart-item-variant">{variant.quantity_value}{variant.quantity_unit}</span>}
                     </div>
                     <button
                         className="cart-item-remove"
