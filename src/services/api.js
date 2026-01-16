@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'https://enterprises-backend-pr
 const fetchWithAuth = async (url, options = {}) => {
     const response = await fetch(url, {
         ...options,
-        credentials: 'include', // Required for Spring Security session cookies
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             ...options.headers,
@@ -23,7 +23,20 @@ const fetchWithAuth = async (url, options = {}) => {
         }
         throw error;
     }
-    return response.json();
+
+    // Check if the response has content before trying to parse JSON
+    const contentType = response.headers.get('content-type');
+    if (response.status === 204 || !contentType || !contentType.includes('application/json')) {
+        return null;
+    }
+
+    try {
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
+    } catch (e) {
+        console.error('Error parsing JSON:', e);
+        return null;
+    }
 };
 
 // ============ AUTH ============
