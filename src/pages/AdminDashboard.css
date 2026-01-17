@@ -5,7 +5,7 @@
 .admin-dashboard {
     min-height: 100vh;
     background: var(--bg-secondary);
-    padding: 24px;
+    padding: calc(var(--nav-height) + 24px) 24px 24px;
 }
 
 /* Header */
@@ -475,7 +475,7 @@
 
 .products-table th {
     text-align: left;
-    padding: 16px 20px;
+    padding: 12px 20px;
     background: var(--bg-secondary);
     color: var(--text-secondary);
     font-weight: 600;
@@ -486,7 +486,7 @@
 }
 
 .products-table td {
-    padding: 16px 20px;
+    padding: 12px 20px;
     border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
 }
@@ -644,7 +644,7 @@
 /* Responsive */
 @media (max-width: 768px) {
     .admin-dashboard {
-        padding: 16px;
+        padding: calc(var(--nav-height) + 16px) 16px 16px;
     }
 
     .admin-header {

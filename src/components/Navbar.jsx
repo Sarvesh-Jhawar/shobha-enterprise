@@ -90,7 +90,7 @@ export default function Navbar() {
                         <Link to="/about" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
                         <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
                         <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="admin-link">
-                            <ShieldCheck size={16} /> Admin Login
+                            Admin Login
                         </Link>
                     </div>
                 </div>

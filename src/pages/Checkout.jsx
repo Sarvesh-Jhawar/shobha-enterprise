@@ -23,7 +23,7 @@ export default function Checkout() {
     const [orderPlaced, setOrderPlaced] = useState(false);
 
     // WhatsApp business number
-    const WHATSAPP_NUMBER = '919347953935';
+    const WHATSAPP_NUMBER = '917382150100';
 
     if (cartItems.length === 0 && !orderPlaced) {
         return (

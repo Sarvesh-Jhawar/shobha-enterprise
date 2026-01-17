@@ -96,9 +96,9 @@
     pointer-events: none;
 }
 
-.input-wrapper input {
+.admin-login-page .input-wrapper input {
     width: 100%;
-    padding: 14px 14px 14px 44px;
+    padding: 14px 14px 14px 52px;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
